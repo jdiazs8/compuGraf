@@ -1,5 +1,8 @@
+#!/usr/bin/python
+# -*- coding: latin-1 -*-
+
 # NOMBRE DEL PROGRAMA: Apocalypsis Runner
-# AUTOR DEL PROGRAMA: Jorge DÃ­az, Michael Montes, Julio Morales, Johan SÃ¡nchez
+# AUTOR DEL PROGRAMA: Jorge Díaz, Michael Montes, Julio Morales, Johan Sánchez
 
 # LIBRERIAS
 import simplegui
@@ -9,12 +12,12 @@ LIENZO = [1024, 720]
 TIEMPO = 0
 DISTANCIA = 0
 PUNTAJE = 0
+
 image_fondo = simplegui.load_image("https://www.dropbox.com/s/thpb5tgrjfsxxvx/presentation-3-e1478644528432.png?dl=1")
 obstaculos = ['https://www.dropbox.com/s/8xl28u2lqymsbio/hielo.png?dl=1',
               'https://www.dropbox.com/s/ie9osvrdytwaswy/piedra.png?dl=1',
               'https://www.dropbox.com/s/k3ziquuae84f38t/tronco.png?dl=1']
 personaje = ['https://www.dropbox.com/s/5kl57rh2jygfpyx/Personage.png?dl=1']
-
 
 # MANEJADORES DE EVENTOS
 class Escenario:
