@@ -57,7 +57,6 @@ class Fondo(Escenografia):
     def __init__(self, image, posicion):
         self.image = image
         self.image_tamano = [self.image.get_width(), self.image.get_height()]
-        print self.image_tamano
 
     def draw(self, canvas):
         canvas.draw_image(self.image, [self.image_tamano[0] // 2, self.image_tamano[1] // 2], self.image_tamano,
