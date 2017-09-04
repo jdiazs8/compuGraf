@@ -5,7 +5,8 @@
 # AUTOR DEL PROGRAMA: Jorge Díaz, Michael Montes, Julio Morales, Johan Sánchez
 
 # LIBRERIAS
-import simplegui
+#import simplegui
+import SimpleGUICS2Pygame.simpleguics2pygame as simplegui
 
 # CONSTANTES Y VARIABLES GLOBALES
 LIENZO = [1024, 720]
