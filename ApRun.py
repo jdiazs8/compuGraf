@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: latin-1 -*-
-# commit checho
+# commit de prueba dos
 # NOMBRE DEL PROGRAMA: Apocalypsis Runner
 # AUTOR DEL PROGRAMA: Jorge Díaz, Michael Montes, Julio Morales, Johan Sánchez
 
