@@ -1,8 +1,8 @@
-#!/usr/bin/python
-# -*- coding: latin-1 -*-
+#! /usr/bin env python
+# -*- coding: utf-8
 
 # NOMBRE DEL PROGRAMA: Apocalypsis Runner
-# AUTOR DEL PROGRAMA: Jorge Díaz, Michael Montes, Julio Morales, Johan Sánchez
+# AUTOR DEL PROGRAMA: Jorge DÃ­az, Michael Montes, Julio Morales, Johan SÃ¡nchez
 
 # LIBRERIAS
 #import simplegui
@@ -13,12 +13,13 @@ LIENZO = [1024, 720]
 TIEMPO = 0
 DISTANCIA = 0
 PUNTAJE = 0
-
 image_fondo = simplegui.load_image("https://www.dropbox.com/s/thpb5tgrjfsxxvx/presentation-3-e1478644528432.png?dl=1")
 obstaculos = ['https://www.dropbox.com/s/8xl28u2lqymsbio/hielo.png?dl=1',
               'https://www.dropbox.com/s/ie9osvrdytwaswy/piedra.png?dl=1',
               'https://www.dropbox.com/s/k3ziquuae84f38t/tronco.png?dl=1']
-personaje = ['https://www.dropbox.com/s/5kl57rh2jygfpyx/Personage.png?dl=1']
+protagonista = ['https://www.dropbox.com/s/5kl57rh2jygfpyx/Personage.png?dl=1']
+antagonista = ['https://www.dropbox.com/s/9j08feq9aeknlgi/2017-09-11%281%29.png?dl=1']
+
 
 # MANEJADORES DE EVENTOS
 class Escenario:
@@ -27,8 +28,8 @@ class Escenario:
 
 
 class Escenografia(Escenario):
-    def __init__(self):
-        pass
+    def __init__(self, posicion):
+        self.posicion = posicion
 
 
 class Obstaculo(Escenografia):
@@ -42,7 +43,40 @@ class Obstaculo(Escenografia):
                           self.posicion, self.image_tamano)
 
 
+class Accesorio(Escenografia):
+    def __init__(self, image, posicion):
+        self.image = image
+        self.image_tamano = [self.image.get_width(), self.image.get_height()]
+        self.posicion = posicion
+
+    def draw(self, canvas):
+        canvas.draw_image(self.image, [self.image_tamano[0] // 2, self.image_tamano[1] // 2], self.image_tamano,
+                          self.posicion, self.image_tamano)
+
+
 class Personaje(Escenario):
+    def __init__(self, image, posicion):
+        self.imagePeronaje = image
+        self.image_tamano = [self.imagePeronaje.get_width(), self.imagePeronaje.get_height()]
+        self.posicion = posicion
+
+    def draw(self, canvas):
+        canvas.draw_image(self.imagePeronaje, [self.image_tamano[0] // 2, self.image_tamano[1] // 2], self.image_tamano,
+                          self.posicion, self.image_tamano)
+
+
+class Antagonista(Personaje):
+    def __init__(self, image, posicion):
+        self.imagePeronaje = image
+        self.image_tamano = [self.imagePeronaje.get_width(), self.imagePeronaje.get_height()]
+        self.posicion = posicion
+
+    def draw(self, canvas):
+        canvas.draw_image(self.imagePeronaje, [self.image_tamano[0] // 2, self.image_tamano[1] // 2], self.image_tamano,
+                          self.posicion, self.image_tamano)
+
+
+class Protagonista(Personaje):
     def __init__(self, image, posicion):
         self.imagePeronaje = image
         self.image_tamano = [self.imagePeronaje.get_width(), self.imagePeronaje.get_height()]
@@ -73,6 +107,7 @@ def draw_handler(canvas):
     obstaculo1.draw(canvas)
     obstaculo2.draw(canvas)
     personaje1.draw(canvas)
+    personaje2.draw(canvas)
 
 
 # REGISTRO DE CONTROLES Y OBJETOS
@@ -80,12 +115,13 @@ frame = simplegui.create_frame('Sprite', LIENZO[0], LIENZO[1])
 frame.set_draw_handler(draw_handler)
 fondo = Fondo(image_fondo, [0, 0])
 im = simplegui.load_image(obstaculos[0])
-obstaculo1 = Obstaculo(im, [600, 650])
+obstaculo1 = Obstaculo(im, [600, 590])
 im = simplegui.load_image(obstaculos[1])
-obstaculo2 = Obstaculo(im, [900, 650])
-imPer = simplegui.load_image(personaje[0])
-personaje1 = Personaje(imPer, [80, 570])
+obstaculo2 = Obstaculo(im, [900, 590])
+imPer = simplegui.load_image(protagonista[0])
+imPerAnt = simplegui.load_image(antagonista[0])
+personaje1 = Protagonista(imPer, [400, 590])
+personaje2 = Antagonista(imPerAnt, [90, 530])
 
 # INICIO
 frame.start()
-
