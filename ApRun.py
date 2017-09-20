@@ -10,7 +10,7 @@ LIENZO = [1024, 720]
 TIEMPO = 0
 DISTANCIA = 0
 PUNTAJE = 0
-imagen_fondo = simplegui.load_image("https://www.dropbox.com/s/thpb5tgrjfsxxvx/presentation-3-e1478644528432.png?dl=1")
+imagen_fondo = simplegui.load_image("https://www.dropbox.com/s/es0hm8bdkqioepv/BgLarge.png?dl=1")
 obstaculos = ['https://www.dropbox.com/s/8xl28u2lqymsbio/hielo.png?dl=1',
               'https://www.dropbox.com/s/ie9osvrdytwaswy/piedra.png?dl=1',
               'https://www.dropbox.com/s/k3ziquuae84f38t/tronco.png?dl=1',
@@ -24,94 +24,105 @@ imagen_monedas = simplegui.load_image('https://www.dropbox.com/s/m2co448t3gcpe6i
 class Escenario:
     def __init__(self, posicion):
         self.posicion = posicion
+    
+    def mover(self):
+        pass
 
 
 class Escenografia(Escenario):
     def __init__(self, posicion):
-        self.posicion = posicion
+        Escenario.__init__(self,posicion)
 
 class Fondo(Escenografia):
-    def __init__(self, image, posicion):
+    def __init__(self, image, posicion, vel):
+        Escenografia.__init__(self,posicion)
         self.image = image
+        self.vel = vel
         self.image_tamano = [self.image.get_width(), self.image.get_height()]
 
     def draw(self, canvas):
         canvas.draw_image(self.image, [self.image_tamano[0] // 2, self.image_tamano[1] // 2], self.image_tamano,
-                          [LIENZO[0] // 2, LIENZO[1] // 2], self.image_tamano)
+                          self.posicion, [self.image_tamano[0]*0.7, self.image_tamano[1]*0.7])
         canvas.draw_text('Tiempo: ' + str(TIEMPO), (80, 50), 20, 'White', 'serif')
         canvas.draw_text('Distancia: ' + str(DISTANCIA), (400, 50), 20, 'White', 'serif')
         canvas.draw_text('Puntos: ' + str(PUNTAJE), (800, 50), 20, 'White', 'serif')
 
+    def mover(self):
+        self.posicion[0] += self.vel[0]
+        self.posicion[1] += self.vel[1]
+        
 class Obstaculo(Escenografia):
     def __init__(self, image, posicion):
+        Escenografia.__init__(self,posicion)
+        self.posicion = posicion
         self.image = image
         self.image_tamano = [self.image.get_width(), self.image.get_height()]
-        self.posicion = posicion
+        self.image_centro = [self.image.get_width() // 2, self.image.get_height()// 2]
+    
+    def draw(self, canvas):
+        canvas.draw_image(self.image, self.image_centro,self.image_tamano,self.posicion,[self.image_tamano[0] * 0.5,self.image_tamano[1] * 0.5])
+
+class Accesorio(Escenografia):
+    def __init__(self, image, posicion, frames, refresco):
+        Escenografia.__init__(self,posicion)
+        self.image = image
+        self.frames = frames
+        self.refresco = refresco
+        self.time = 0
+        self.frame_centro = [0,0]
+        self.image_tamano = [self.image.get_width()//self.frames, self.image.get_height()]
+        self.image_centro = [self.image_tamano[0]//2, self.image_tamano[1]//2]        
+
+    def anima_sprite(self):
+        sprite_index = (self.time% self.frames)//1
+        self.frame_centro = [self.image_centro[0] + sprite_index * self.image_tamano[0], self.image_centro[1]]
+        self.time += 1
+        
+    def draw(self, canvas):
+        canvas.draw_image(self.image, self.frame_centro, self.image_tamano, self.posicion, [self.image_tamano[0]//2, self.image_tamano[1]//2])
+
+class Personaje(Escenario):
+    def __init__(self, image, posicion):
+        Escenario.__init__(self,posicion)
+        self.image = image
+        self.image_tamano = [self.image.get_width(), self.image.get_height()]
 
     def draw(self, canvas):
         canvas.draw_image(self.image, [self.image_tamano[0] // 2, self.image_tamano[1] // 2], self.image_tamano,
                           self.posicion, self.image_tamano)
 
-
-class Accesorio(Escenografia):
-    def __init__(self, image, posicion, frames, refresco):
-        self.image = image
-        self.frames = frames
-        self.refresco = refresco
-        self.time = 0
-        self.frame_centro = [0,0]
-        self.image_tamano = [self.image.get_width()//self.frames, self.image.get_height()]
-        self.image_centro = [self.image_tamano[0]//2, self.image_tamano[1]//2]
-        self.posicion = posicion
-
-    def anima_sprite(self):
-        sprite_index = (self.time% self.frames)//1
-        self.frame_centro = [self.image_centro[0] + sprite_index * self.image_tamano[0], self.image_centro[1]]
-        self.time += 1
-        
-    def draw(self, canvas):
-        canvas.draw_image(self.image, self.frame_centro, self.image_tamano, self.posicion, self.image_tamano)
-
-class Personaje(Escenario):
-    def __init__(self, image, posicion):
-        self.imagePeronaje = image
-        self.image_tamano = [self.imagePeronaje.get_width(), self.imagePeronaje.get_height()]
-        self.posicion = posicion
-
-    def draw(self, canvas):
-        canvas.draw_image(self.imagePeronaje, [self.image_tamano[0] // 2, self.image_tamano[1] // 2], self.image_tamano,
-                          self.posicion, self.image_tamano)
-
 class Protagonista(Personaje):
-    def __init__(self, image, posicion, frames, refresco):
-        self.image = image
+    def __init__(self, image, posicion, frames, refresco, vel):
+        Personaje.__init__(self,image,posicion)
         self.frames = frames
         self.refresco = refresco
         self.time = 0
+        self.vel = vel
         self.frame_centro = [0,0]
         self.image_tamano = [self.image.get_width()//self.frames, self.image.get_height()]
         self.image_centro = [self.image_tamano[0]//2, self.image_tamano[1]//2]
-        self.posicion = posicion
 
     def anima_sprite(self):
         sprite_index = (self.time% self.frames)//1
         self.frame_centro = [self.image_centro[0] + sprite_index * self.image_tamano[0], self.image_centro[1]]
         self.time += 1
         
+    def mover(self):
+        self.posicion[0] += self.vel[0]
+        self.posicion[1] += self.vel[1]
+        
     def draw(self, canvas):
         canvas.draw_image(self.image, self.frame_centro, self.image_tamano, self.posicion, self.image_tamano)
-
 
 class Antagonista(Personaje):
     def __init__(self, image, posicion, frames, refresco):
-        self.imagePeronaje = image
+        Personaje.__init__(self,image,posicion)
         self.frames = frames
         self.refresco = refresco
         self.time = 0
         self.frame_centro = [0,0]
-        self.image_tamano = [self.imagePeronaje.get_width()//self.frames, self.imagePeronaje.get_height()]
+        self.image_tamano = [self.image.get_width()//self.frames, self.image.get_height()]
         self.image_centro = [self.image_tamano[0]//2, self.image_tamano[1]//2]
-        self.posicion = posicion
 
     def anima_sprite(self):
         sprite_index = (self.time% self.frames)//1
@@ -121,31 +132,47 @@ class Antagonista(Personaje):
     def draw(self, canvas):
         canvas.draw_image(self.imagePeronaje, self.frame_centro, self.image_tamano, self.posicion, self.image_tamano)
     
+# MANEJADORES DE CONTROLES
+def keydown_handler(key):
+    vel = 1
+    
+    if key == simplegui.KEY_MAP['left']:
+        protagonista.vel[0] -= vel
+    elif key == simplegui.KEY_MAP['right']:
+        protagonista.vel[0] += vel
+        fondo.posicion[0] -= (vel*50)
+    elif key == simplegui.KEY_MAP['down']:
+        protagonista.vel[1] += vel
+    elif key == simplegui.KEY_MAP['up']:
+        protagonista.vel[1] -= vel
+
+def draw_handler(canvas):
+    fondo.draw(canvas)    # Dibuja el objeto
+    
 # MANEJADOR DE DIBUJO
 def draw_handler(canvas):
     fondo.draw(canvas)
     rocas.draw(canvas)
-    #roca.draw(canvas)
     protagonista.draw(canvas)
+    protagonista.mover()         # Actualiza la posición del objeto
     moneda.draw(canvas)
-    antagonista.draw(canvas)
+    #antagonista.draw(canvas)
     fogata.draw(canvas)
 
 
 # REGISTRO DE CONTROLES Y OBJETOS
 frame = simplegui.create_frame('Apocalyse Runner', LIENZO[0], LIENZO[1])
 frame.set_draw_handler(draw_handler)
-fondo = Fondo(imagen_fondo, [0, 0])
+frame.set_keydown_handler(keydown_handler)
+fondo = Fondo(imagen_fondo, [(6520 // 2) - 1024, LIENZO[1] // 2], [0,0])
 imagen_rocas = simplegui.load_image(obstaculos[3])
-rocas = Obstaculo(imagen_rocas, [600, 590])
-#imagen_roca = simplegui.load_image(obstaculos[2])
-#roca = Obstaculo(imagen_roca, [900, 590])
+rocas = Obstaculo(imagen_rocas, [600, 600])
 imagen_protagonista = simplegui.load_image(sprites_protagonista[0])
 imagen_antagonista = simplegui.load_image(antagonista[0])
 image_fogata = simplegui.load_image(sprites_obstaculos[0])
-fogata = Accesorio(image_fogata, [900, 480],8,100)
-protagonista = Protagonista(imagen_protagonista, [400, 590], 4, 100)
-moneda = Accesorio(imagen_monedas, [600, 450],12,70)
+fogata = Accesorio(image_fogata, [900, 580],8,100)
+protagonista = Protagonista(imagen_protagonista, [100, 590], 4, 100, [0,0])
+moneda = Accesorio(imagen_monedas, [600, 480],12,70)
 antagonista = Antagonista(imagen_antagonista, [170, 530], 6, 100)
 timer_protagonista = simplegui.create_timer(protagonista.refresco, protagonista.anima_sprite)
 timer_antagonista = simplegui.create_timer(antagonista.refresco, antagonista.anima_sprite)
