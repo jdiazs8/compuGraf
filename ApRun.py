@@ -3,6 +3,7 @@
 
 # LIBRERIAS
 #import simplegui
+import random
 import SimpleGUICS2Pygame.simpleguics2pygame as simplegui
 
 # CONSTANTES Y VARIABLES GLOBALES
@@ -10,15 +11,18 @@ LIENZO = [1024, 720]
 TIEMPO = 0
 DISTANCIA = 0
 PUNTAJE = 0
-image_fondo = simplegui.load_image("https://www.dropbox.com/s/es0hm8bdkqioepv/BgLarge.png?dl=1")
+image_fondo = simplegui.load_image("https://www.dropbox.com/s/4sx8rhu0qb68x1t/Fondo.png?dl=1")
+image_piso = simplegui.load_image("https://www.dropbox.com/s/vlz5ixgtfrkocq1/Escenario.png?dl=1")
+image_fogata = simplegui.load_image("https://www.dropbox.com/s/7msvpmaom0p8ex2/fogataSprite.png?dl=1")
 obstaculos = ['https://www.dropbox.com/s/8xl28u2lqymsbio/hielo.png?dl=1',
               'https://www.dropbox.com/s/ie9osvrdytwaswy/piedra.png?dl=1',
               'https://www.dropbox.com/s/k3ziquuae84f38t/tronco.png?dl=1',
               'https://www.dropbox.com/s/4q8idgnsb9777ik/rocas7.png?dl=1']
-sprites_obstaculos = ['https://www.dropbox.com/s/7msvpmaom0p8ex2/fogataSprite.png?dl=1']
+sprites_monedas = ['https://www.dropbox.com/s/m2co448t3gcpe6i/monedasOro.PNG?dl=1',
+                  'https://www.dropbox.com/s/imw5cpl11gsy7e1/monedasPlata.png?dl=1']
+accesorios = []
 sprites_protagonista = ['https://www.dropbox.com/s/netfiplix1wmi6b/PersonCorriendo.png?dl=1']
 sprites_antagonista = ['https://www.dropbox.com/s/gq1qjtzjolh39sa/2017-09-11.png?dl=1']
-image_moneda = simplegui.load_image('https://www.dropbox.com/s/m2co448t3gcpe6i/monedasOro.PNG?dl=1')
 
 # MANEJADORES DE CLASES
 class Escenario:
@@ -105,10 +109,20 @@ class Protagonista(Personaje):
         sprite_index = (self.time% self.frames)//1
         self.frame_centro = [self.image_centro[0] + sprite_index * self.image_tamano[0], self.image_centro[1]]
         self.time += 1
-        
+    
     def mover(self):
         self.posicion[0] += self.vel[0]
         self.posicion[1] += self.vel[1]
+        if self.posicion[0] == LIENZO[0] // 2:
+            self.colision('x')
+        if self.posicion[1] == LIENZO[1]:
+            self.colision('y')
+           
+    def colision(self, dim):
+        if dim == 'x':
+            self.vel[0] = 0
+        if dim == 'y':
+            self.vel[1] = 0
         
     def draw(self, canvas):
         canvas.draw_image(self.image, self.frame_centro, self.image_tamano, self.posicion, self.image_tamano)
@@ -136,27 +150,27 @@ def keydown_handler(key):
     vel = 1
     
     if key == simplegui.KEY_MAP['left']:
-        protagonista.vel[0] -= vel
+        fondo.vel[0] += vel
+        piso.vel[0] += (vel*-2)
     elif key == simplegui.KEY_MAP['right']:
-        protagonista.vel[0] += vel
-        fondo.posicion[0] -= (vel*50)
-    elif key == simplegui.KEY_MAP['down']:
-        protagonista.vel[1] += vel
+        fondo.vel[0] -= vel
+        piso.vel[0] += (vel*-2)
     elif key == simplegui.KEY_MAP['up']:
         protagonista.vel[1] -= vel
-
-def draw_handler(canvas):
-    fondo.draw(canvas)    # Dibuja el objeto
 
 # MANEJADOR DE DIBUJO
 def draw_handler(canvas):
     fondo.draw(canvas)
+    fondo.mover()
+    piso.draw(canvas)
+    piso.mover()
     rocas.draw(canvas)
     protagonista.draw(canvas)
-    protagonista.mover()         # Actualiza la posición del objeto
-    moneda.draw(canvas)
-    #antagonista.draw(canvas)
     fogata.draw(canvas)
+    protagonista.mover()         # Actualiza la posición del objeto
+    for accesorio in accesorios:
+        accesorio.draw(canvas)
+    #antagonista.draw(canvas)
 
 
 # REGISTRO DE CONTROLES Y OBJETOS
@@ -164,23 +178,28 @@ frame = simplegui.create_frame('Apocalyse Runner', LIENZO[0], LIENZO[1])
 frame.set_draw_handler(draw_handler)
 frame.set_keydown_handler(keydown_handler)
 fondo = Fondo(image_fondo, [(6520 // 2) - 1024, LIENZO[1] // 2], [0,0])
+piso = Fondo(image_piso, [(6520 // 2) - 1024, LIENZO[1] // 2], [0,0])
 imagen_rocas = simplegui.load_image(obstaculos[3])
 rocas = Obstaculo(imagen_rocas, [600, 600])
 imagen_protagonista = simplegui.load_image(sprites_protagonista[0])
-image_fogata = simplegui.load_image(sprites_obstaculos[0])
+protagonista = Protagonista(imagen_protagonista, [100, 590], 4, 100, [1,0])
 fogata = Accesorio(image_fogata, [900, 580],8,100)
-protagonista = Protagonista(imagen_protagonista, [100, 590], 4, 100, [0,0])
-moneda = Accesorio(image_moneda, [600, 480],12,70)
+
+for i in range(2):
+    image_accesorio = simplegui.load_image(random.choice(sprites_monedas))
+    accesorio = Accesorio(image_accesorio, [random.randrange(0, LIENZO[0]), 480],12,70)
+    accesorios.append(accesorio)
+    timer_accesorio = simplegui.create_timer(accesorio.refresco, accesorio.anima_sprite)
+    timer_accesorio.start()
+
 image_antagonista = simplegui.load_image(sprites_antagonista[0])
 antagonista = Antagonista(image_antagonista, [170, 530], 6, 100)
 timer_protagonista = simplegui.create_timer(protagonista.refresco, protagonista.anima_sprite)
 timer_antagonista = simplegui.create_timer(antagonista.refresco, antagonista.anima_sprite)
-timer_moneda = simplegui.create_timer(moneda.refresco, moneda.anima_sprite)
 timer_fogata = simplegui.create_timer(fogata.refresco, fogata.anima_sprite)
 
 # INICIO
 frame.start()
 timer_protagonista.start()
 timer_antagonista.start()
-timer_moneda.start()
 timer_fogata.start()
