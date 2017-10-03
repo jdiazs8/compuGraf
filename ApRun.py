@@ -2,9 +2,9 @@
 # AUTOR DEL PROGRAMA: Jorge Díaz, Michael Montes, Julio Morales, Johan Sánchez
 
 # LIBRERIAS
-#import simplegui
+import simplegui
 import random
-import SimpleGUICS2Pygame.simpleguics2pygame as simplegui
+#import SimpleGUICS2Pygame.simpleguics2pygame as simplegui
 
 # CONSTANTES Y VARIABLES GLOBALES
 LIENZO = [1024, 720]
@@ -26,20 +26,20 @@ sprites_antagonista = ['https://www.dropbox.com/s/gq1qjtzjolh39sa/2017-09-11.png
 
 # MANEJADORES DE CLASES
 class Escenario:
-    def __init__(self, posicion):
+    def __init__(self, posicion, image):
         self.posicion = posicion
+        self.image = image
     
     def mover(self):
         pass
 
 class Escenografia(Escenario):
-    def __init__(self, posicion):
-        Escenario.__init__(self,posicion)
+    def __init__(self, posicion, image):
+        Escenario.__init__(self,posicion, image)
 
 class Fondo(Escenografia):
     def __init__(self, image, posicion, vel):
-        Escenografia.__init__(self,posicion)
-        self.image = image
+        Escenografia.__init__(self,posicion, image)
         self.vel = vel
         self.image_tamano = [self.image.get_width(), self.image.get_height()]
 
@@ -56,9 +56,7 @@ class Fondo(Escenografia):
         
 class Obstaculo(Escenografia):
     def __init__(self, image, posicion):
-        Escenografia.__init__(self,posicion)
-        self.posicion = posicion
-        self.image = image
+        Escenografia.__init__(self,posicion, image)
         self.image_tamano = [self.image.get_width(), self.image.get_height()]
         self.image_centro = [self.image.get_width() // 2, self.image.get_height()// 2]
     
@@ -67,8 +65,7 @@ class Obstaculo(Escenografia):
 
 class Accesorio(Escenografia):
     def __init__(self, image, posicion, frames, refresco):
-        Escenografia.__init__(self,posicion)
-        self.image = image
+        Escenografia.__init__(self,posicion, image)
         self.frames = frames
         self.refresco = refresco
         self.time = 0
@@ -86,8 +83,7 @@ class Accesorio(Escenografia):
 
 class Personaje(Escenario):
     def __init__(self, image, posicion):
-        Escenario.__init__(self,posicion)
-        self.image = image
+        Escenario.__init__(self,posicion, image)
         self.image_tamano = [self.image.get_width(), self.image.get_height()]
 
     def draw(self, canvas):
