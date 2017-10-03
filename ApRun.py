@@ -149,10 +149,7 @@ class Antagonista(Personaje):
 def keydown_handler(key):
     vel = 1
     
-    if key == simplegui.KEY_MAP['left']:
-        fondo.vel[0] += vel
-        piso.vel[0] += (vel*-2)
-    elif key == simplegui.KEY_MAP['right']:
+    if key == simplegui.KEY_MAP['right']:
         fondo.vel[0] -= vel
         piso.vel[0] += (vel*-2)
     elif key == simplegui.KEY_MAP['up']:
