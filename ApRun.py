@@ -42,10 +42,15 @@ class Fondo(Escenografia):
         Escenografia.__init__(self,posicion, image)
         self.vel = vel
         self.image_tamano = [self.image.get_width(), self.image.get_height()]
+        self.centro = [self.image_tamano[0] // 2, self.image_tamano[1] // 2]
 
     def draw(self, canvas):
-        canvas.draw_image(self.image, [self.image_tamano[0] // 2, self.image_tamano[1] // 2], self.image_tamano,
-                          self.posicion, [self.image_tamano[0]*0.7, self.image_tamano[1]*0.7])
+        canvas.draw_image(self.image, self.centro, self.image_tamano,
+                          self.posicion, [self.image_tamano[0], self.image_tamano[1]*0.7])
+        if self.posicion[0] < -2360:
+            canvas.draw_image(self.image, self.centro, self.image_tamano,
+                          [4274, self.posicion[1]], [self.image_tamano[0], self.image_tamano[1]*0.7])
+        
         canvas.draw_text('Tiempo: ' + str(TIEMPO), (80, 50), 20, 'White', 'serif')
         canvas.draw_text('Distancia: ' + str(DISTANCIA), (400, 50), 20, 'White', 'serif')
         canvas.draw_text('Puntos: ' + str(PUNTAJE), (800, 50), 20, 'White', 'serif')
