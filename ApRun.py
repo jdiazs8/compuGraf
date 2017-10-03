@@ -55,18 +55,25 @@ class Fondo(Escenografia):
         self.posicion[1] += self.vel[1]
         
 class Obstaculo(Escenografia):
-    def __init__(self, image, posicion):
+    def __init__(self, image, posicion, vel):
         Escenografia.__init__(self,posicion, image)
+        self.posicion = posicion
+        self.vel = vel
         self.image_tamano = [self.image.get_width(), self.image.get_height()]
         self.image_centro = [self.image.get_width() // 2, self.image.get_height()// 2]
     
     def draw(self, canvas):
         canvas.draw_image(self.image, self.image_centro,self.image_tamano,self.posicion,[self.image_tamano[0] * 0.5,self.image_tamano[1] * 0.5])
+        
+    def mover(self):
+        self.posicion[0] += self.vel[0]
+        self.posicion[1] += self.vel[1]
 
 class Accesorio(Escenografia):
-    def __init__(self, image, posicion, frames, refresco):
+    def __init__(self, image, posicion, frames, refresco, vel):
         Escenografia.__init__(self,posicion, image)
         self.frames = frames
+        self.vel = vel
         self.refresco = refresco
         self.time = 0
         self.frame_centro = [0,0]
@@ -80,6 +87,10 @@ class Accesorio(Escenografia):
         
     def draw(self, canvas):
         canvas.draw_image(self.image, self.frame_centro, self.image_tamano, self.posicion, [self.image_tamano[0]//2, self.image_tamano[1]//2])
+        
+    def mover(self):
+        self.posicion[0] += self.vel[0]
+        self.posicion[1] += self.vel[1]
 
 class Personaje(Escenario):
     def __init__(self, image, posicion):
@@ -148,6 +159,10 @@ def keydown_handler(key):
     if key == simplegui.KEY_MAP['right']:
         fondo.vel[0] -= vel
         piso.vel[0] += (vel*-2)
+        rocas.vel[0] += (vel*-2)
+        fogata.vel[0] += (vel*-2)
+        for accesorio in accesorios:
+            accesorio.vel[0] += (vel*-2)
     elif key == simplegui.KEY_MAP['up']:
         protagonista.vel[1] -= vel
 
@@ -158,11 +173,14 @@ def draw_handler(canvas):
     piso.draw(canvas)
     piso.mover()
     rocas.draw(canvas)
+    rocas.mover()
     protagonista.draw(canvas)
     fogata.draw(canvas)
+    fogata.mover()
     protagonista.mover()         # Actualiza la posición del objeto
     for accesorio in accesorios:
         accesorio.draw(canvas)
+        accesorio.mover()
     #antagonista.draw(canvas)
 
 
@@ -173,14 +191,14 @@ frame.set_keydown_handler(keydown_handler)
 fondo = Fondo(image_fondo, [(6520 // 2) - 1024, LIENZO[1] // 2], [0,0])
 piso = Fondo(image_piso, [(6520 // 2) - 1024, LIENZO[1] // 2], [0,0])
 imagen_rocas = simplegui.load_image(obstaculos[3])
-rocas = Obstaculo(imagen_rocas, [600, 600])
+rocas = Obstaculo(imagen_rocas, [600, 600], [0,0])
 imagen_protagonista = simplegui.load_image(sprites_protagonista[0])
 protagonista = Protagonista(imagen_protagonista, [100, 590], 4, 100, [1,0])
-fogata = Accesorio(image_fogata, [900, 580],8,100)
+fogata = Accesorio(image_fogata, [900, 580],8,100, [0, 0])
 
-for i in range(2):
+for i in range(50):
     image_accesorio = simplegui.load_image(random.choice(sprites_monedas))
-    accesorio = Accesorio(image_accesorio, [random.randrange(0, LIENZO[0]), 480],12,70)
+    accesorio = Accesorio(image_accesorio, [random.randrange(0, fondo.image_tamano[0], 80), 480],12,70, [0, 0])
     accesorios.append(accesorio)
     timer_accesorio = simplegui.create_timer(accesorio.refresco, accesorio.anima_sprite)
     timer_accesorio.start()
