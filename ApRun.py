@@ -12,15 +12,19 @@ import random
 # CONSTANTES Y VARIABLES GLOBALES
 LIENZO = [1024, 720]
 TIEMPO = 0
+TIEMPO_LEVEL = 0 #global que maneja el indice de aumento del tiempo en el juego
 DISTANCIA = 0
 PUNTAJE = 0
 GRAVEDAD = 0.1
+VELOCIDAD_JUEGO = 0 #global que maneja la velocidad global de juego
 FRICCION = 0.001
+INICIO = True #global para demarcar eventos del inicio del juego
 accesorios = []
+obstaculos = []
 image_fondo = simplegui.load_image("https://www.dropbox.com/s/4sx8rhu0qb68x1t/Fondo.png?dl=1")
 image_piso = simplegui.load_image("https://www.dropbox.com/s/vlz5ixgtfrkocq1/Escenario.png?dl=1")
 image_fogata = simplegui.load_image("https://www.dropbox.com/s/7msvpmaom0p8ex2/fogataSprite.png?dl=1")
-obstaculos = ['https://www.dropbox.com/s/8xl28u2lqymsbio/hielo.png?dl=1',
+images_obstaculos = ['https://www.dropbox.com/s/8xl28u2lqymsbio/hielo.png?dl=1',
               'https://www.dropbox.com/s/ie9osvrdytwaswy/piedra.png?dl=1',
               'https://www.dropbox.com/s/k3ziquuae84f38t/tronco.png?dl=1',
               'https://www.dropbox.com/s/4q8idgnsb9777ik/rocas7.png?dl=1']
@@ -104,7 +108,6 @@ class Accesorio(Escenografia):
         self.posicion[0] += self.vel[0]
         self.posicion[1] += self.vel[1]
 
-
 class Personaje(Escenario):
     def __init__(self, image, posicion):
         Escenario.__init__(self, posicion, image)
@@ -174,40 +177,50 @@ class Antagonista(Personaje):
         self.time += 1
 
     def draw(self, canvas):
-        canvas.draw_image(self.imagePeronaje, self.frame_centro, self.image_tamano, self.posicion, self.image_tamano)
+        canvas.draw_image(self.image, self.frame_centro, self.image_tamano, self.posicion, self.image_tamano)
 
 # MANEJADORES DE EVENTOS
 # MANEJADOR DE TECLADO
 def keydown_handler(key):
-    vel = 1
-
-    if key == simplegui.KEY_MAP['right']:
-        fondo.vel[0] -= vel
-        piso.vel[0] += (vel * -2)
-        rocas.vel[0] += (vel * -2)
-        fogata.vel[0] += (vel * -2)
+    global VELOCIDAD_JUEGO, INICIO, TIEMPO_LEVEL
+    if key == simplegui.KEY_MAP['right'] and INICIO:
+        VELOCIDAD_JUEGO += 1 #aumento de velocidad global del juego
+        fondo.vel[0] -= VELOCIDAD_JUEGO
+        piso.vel[0] -= (VELOCIDAD_JUEGO * 2)
+        fogata.vel[0] -= (VELOCIDAD_JUEGO * 2)
+        
+        for obstaculo in obstaculos:
+            obstaculo.vel[0] -= (VELOCIDAD_JUEGO * 2)
+        
         for accesorio in accesorios:
-            accesorio.vel[0] += (vel * -2)
+            accesorio.vel[0] -= (VELOCIDAD_JUEGO * 2)
+        INICIO = False
+        TIEMPO_LEVEL = 1
     elif key == simplegui.KEY_MAP['up']:
         protagonista.vel[1] -= 5
 
 # MANEJADOR DE DIBUJO
 def draw_handler(canvas):
+    global TIEMPO
     fondo.draw(canvas)
     fondo.mover()
     piso.draw(canvas)
     piso.mover()
-    rocas.draw(canvas)
-    rocas.mover()
+    TIEMPO += TIEMPO_LEVEL
+    for obstaculo in obstaculos:
+        obstaculo.draw(canvas)
+        obstaculo.mover()
+    
     protagonista.draw(canvas)
     fogata.draw(canvas)
     fogata.mover()
     protagonista.mover()  # Actualiza la posición del objeto
     protagonista.fisica()
+    
     for accesorio in accesorios:
         accesorio.draw(canvas)
         accesorio.mover()
-        # antagonista.draw(canvas)
+    #antagonista.draw(canvas)
 
 # REGISTRO DE CONTROLES Y OBJETOS
 frame = simplegui.create_frame('Apocalyse Runner', LIENZO[0], LIENZO[1])
@@ -217,8 +230,11 @@ frame.set_keydown_handler(keydown_handler)
 fondo = Fondo(image_fondo, [(6520 // 2) - 1024, LIENZO[1] // 2], [0, 0])
 piso = Fondo(image_piso, [(6520 // 2) - 1024, LIENZO[1] // 2], [0, 0])
 
-imagen_rocas = simplegui.load_image(obstaculos[3])
-rocas = Obstaculo(imagen_rocas, [600, 600], [0, 0])
+#creacion de 5 obstaculos de forma aleatoria por todo el fondo
+for i in range(5):
+    image_obstaculos = simplegui.load_image(random.choice(images_obstaculos))
+    obstaculo = Obstaculo(image_obstaculos, [random.randrange(LIENZO[0] - (LIENZO[0] // 3), fondo.image_tamano[0]), 600], [0, 0])
+    obstaculos.append(obstaculo)
 
 imagen_protagonista = simplegui.load_image(sprites_protagonista[0])
 protagonista = Protagonista(imagen_protagonista, [100, 590], 4, 100, [1, 0])
@@ -229,7 +245,7 @@ timer_fogata = simplegui.create_timer(fogata.refresco, fogata.anima_sprite)
 #creacion de 50 monedas de forma aleatoria por todo el fondo
 for i in range(50):
     image_accesorio = simplegui.load_image(random.choice(sprites_monedas))
-    accesorio = Accesorio(image_accesorio, [random.randrange(0, fondo.image_tamano[0], 80), 480], 12, 70, [0, 0])
+    accesorio = Accesorio(image_accesorio, [random.randrange(LIENZO[0] // 2, fondo.image_tamano[0], 80), 480], 12, 70, [0, 0])
     accesorios.append(accesorio)
     timer_accesorio = simplegui.create_timer(accesorio.refresco, accesorio.anima_sprite)
     timer_accesorio.start()
