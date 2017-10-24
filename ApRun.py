@@ -2,7 +2,7 @@
 # -*- coding: utf-8
 
 # NOMBRE DEL PROGRAMA: Apocalypsis Runner
-# AUTOR DEL PROGRAMA: Jorge Díaz, Michael Montes, Julio Morales, Johan Sánchez
+# AUTOR DEL PROGRAMA: Jorge Díaz, Michael Montes, Julio Morales, Johan Sánchez (checho)
 
 # LIBRERIAS
 import simplegui
@@ -15,12 +15,14 @@ TIEMPO = 0
 TIEMPO_LEVEL = 0 #global que maneja el indice de aumento del tiempo en el juego
 DISTANCIA = 0
 PUNTAJE = 0
-GRAVEDAD = 0.1
+GRAVEDAD = 0.2
+MAX_SALTO = 2 # Control de saltos para no sobrepasar el limite del lienzo
 VELOCIDAD_JUEGO = 0 #global que maneja la velocidad global de juego
 FRICCION = 0.001
 INICIO = True #global para demarcar eventos del inicio del juego
 accesorios = []
 obstaculos = []
+#vectores de de imágenes
 image_fondo = simplegui.load_image("https://www.dropbox.com/s/4sx8rhu0qb68x1t/Fondo.png?dl=1")
 image_piso = simplegui.load_image("https://www.dropbox.com/s/vlz5ixgtfrkocq1/Escenario.png?dl=1")
 image_fogata = simplegui.load_image("https://www.dropbox.com/s/7msvpmaom0p8ex2/fogataSprite.png?dl=1")
@@ -52,13 +54,15 @@ class Fondo(Escenografia):
         self.vel = vel
         self.image_tamano = [self.image.get_width(), self.image.get_height()]
         self.centro = [self.image_tamano[0] // 2, self.image_tamano[1] // 2]
+        print self.image_tamano
 
     def draw(self, canvas):
         canvas.draw_image(self.image, self.centro, self.image_tamano,
                           self.posicion, [self.image_tamano[0], self.image_tamano[1] * 0.7])
-        if self.posicion[0] < -2360:
+        if self.posicion[0] < -1500: #Control de fondo ciclico
+            self.posicion[0] = (self.image_tamano[0]- 3500)
             canvas.draw_image(self.image, self.centro, self.image_tamano,
-                              [4274, self.posicion[1]], [self.image_tamano[0], self.image_tamano[1] * 0.7])
+                              [4284+self.posicion[0], self.posicion[1]], [self.image_tamano[0], self.image_tamano[1] * 0.7])
 
         canvas.draw_text('Tiempo: ' + str(TIEMPO), (80, 50), 20, 'White', 'serif')
         canvas.draw_text('Distancia: ' + str(DISTANCIA), (400, 50), 20, 'White', 'serif')
@@ -135,13 +139,16 @@ class Protagonista(Personaje):
         self.frame_centro = [self.image_centro[0] + sprite_index * self.image_tamano[0], self.image_centro[1]]
         self.time += 1
         
+    # Control para el salto del personaje    
     def fisica(self):
+        global MAX_SALTO
         self.acl[1] = GRAVEDAD
         if (self.posicion[1]+self.image_tamano[1]+self.vel[1]) < LIENZO[1]:
             self.vel[1] += self.acl[1]
             self.vel[1] -= self.vel[1] * FRICCION
         else:
             self.vel[1] = -self.vel[1] * self.amr
+            MAX_SALTO = 2 #Reinicia los saltos a su valor original cuando el personaje toca el suelo
         self.posicion[1] += self.vel[1]
 
     def mover(self):
@@ -151,7 +158,8 @@ class Protagonista(Personaje):
             self.colision('x')
         if self.posicion[1] == 0:
             self.colision('y')
-
+    
+    #Controla los limites de movimiento del personaje
     def colision(self, dim):
         if dim == 'x':
             self.vel[0] = 0
@@ -182,9 +190,9 @@ class Antagonista(Personaje):
 # MANEJADORES DE EVENTOS
 # MANEJADOR DE TECLADO
 def keydown_handler(key):
-    global VELOCIDAD_JUEGO, INICIO, TIEMPO_LEVEL
+    global VELOCIDAD_JUEGO, INICIO, TIEMPO_LEVEL, MAX_SALTO
     if key == simplegui.KEY_MAP['right'] and INICIO:
-        VELOCIDAD_JUEGO += 1 #aumento de velocidad global del juego
+        VELOCIDAD_JUEGO += 2 #aumento de velocidad global del juego
         fondo.vel[0] -= VELOCIDAD_JUEGO
         piso.vel[0] -= (VELOCIDAD_JUEGO * 2)
         fogata.vel[0] -= (VELOCIDAD_JUEGO * 2)
@@ -196,7 +204,8 @@ def keydown_handler(key):
             accesorio.vel[0] -= (VELOCIDAD_JUEGO * 2)
         INICIO = False
         TIEMPO_LEVEL = 1
-    elif key == simplegui.KEY_MAP['up']:
+    elif key == simplegui.KEY_MAP['up'] and MAX_SALTO > 0 :
+        MAX_SALTO -= 1 #Resta las posiblidades del salto
         protagonista.vel[1] -= 5
 
 # MANEJADOR DE DIBUJO
